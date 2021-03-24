@@ -1,0 +1,15 @@
+﻿{
+  "Colors": {
+    "Favourite": "Blue"
+  },
+  "ConnectionStrings": {
+     "DutchContextDb": "Server=localhost,1433;Initial Catalog=DutchTreatDb;User=sa;Password=reallyStrongPwd123;MultipleActiveResultSets=true"
+  },
+  "Logging" : {
+    "LogLevel": {
+      "Default" : "Information",
+      //"DutchTreat" : "Information",
+      "Microsoft": "Warning"
+    }
+  }
+}
