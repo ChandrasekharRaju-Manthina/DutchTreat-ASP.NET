@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using DutchTreat.Data.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace DutchTreat.Data
@@ -14,17 +16,37 @@ namespace DutchTreat.Data
         private readonly DutchContext ctx;
         private readonly IWebHostEnvironment env;
         private readonly ILogger<DutchSeeder> logger;
+        private readonly UserManager<StoreUser> userManager;
 
-        public DutchSeeder(DutchContext ctx, IWebHostEnvironment env, ILogger<DutchSeeder> logger)
+        public DutchSeeder(DutchContext ctx, IWebHostEnvironment env, ILogger<DutchSeeder> logger,
+            UserManager<StoreUser> userManager)
         {
             this.ctx = ctx;
             this.env = env;
             this.logger = logger;
+            this.userManager = userManager;
         }
 
-        public void Seed()
+        public async Task SeedAsync()
         {
             ctx.Database.EnsureCreated();
+
+            StoreUser user = await userManager.FindByEmailAsync("shawn@dutchtreat.com");
+            if (user == null)
+            {
+                user = new StoreUser()
+                {
+                    FirstName = "Shawn",
+                    LastName = "Wildermuth",
+                    Email = "shawn@dutchtreat.com",
+                    UserName = "shawn@dutchtreat.com"
+                };
+                var result = await userManager.CreateAsync(user, "P@ssw0rd!");
+                if (result != IdentityResult.Success)
+                {
+                    throw new InvalidOperationException("Could not creat enew user in seeder");
+                }
+            }
 
             if (!ctx.Products.Any())
             {
@@ -48,7 +70,8 @@ namespace DutchTreat.Data
                             Quantity = 5,
                             UnitPrice = products.First().Price
                         }
-                    }
+                    },
+                    User = user
                 };
 
                 ctx.Orders.Add(order);
